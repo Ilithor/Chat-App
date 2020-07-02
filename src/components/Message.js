@@ -16,11 +16,14 @@ export const Message = ({ currentMember }) => {
       ? "Messages-message currentMember"
       : "Messages-message";
     return (
-      <li className={className}>
-        <span className="avatar" style={{ backgroundColor: member.color }} />
+      <li className={className} key={member.id}>
+        <span
+          className="avatar"
+          style={{ backgroundColor: member.clientData.color }}
+        />
         <div className="Message-content">
-          <div className="username">{member.username}</div>
-          <div className="text">{text}</div>
+          <div className="username">{member.clientData.username}</div>
+          <div className="text">{text?.hello || text}</div>
         </div>
       </li>
     );
@@ -33,7 +36,9 @@ export const Message = ({ currentMember }) => {
 /**
  * @typedef MessageComponentProps
  * @property {object} currentMember
- * @property {number} currentMember.id
- * @property {string} currentMember.color
- * @property {string} currentMember.username
+ * @property {string} currentMember.id
+ * @property {object} currentMember.clientData
+ * @property {number} currentMember.clientData.id
+ * @property {string} currentMember.clientData.color
+ * @property {string} currentMember.clientData.username
  */
