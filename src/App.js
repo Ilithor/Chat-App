@@ -12,6 +12,9 @@ export const App = () => {
   const { member } = useMessageData();
   return (
     <div className="App">
+      <div className="App-header">
+        <h1>Gonk Communications Relay</h1>
+      </div>
       <Message currentMember={member} />
       <Input />
     </div>
