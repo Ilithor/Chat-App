@@ -1,23 +1,19 @@
-import React, { useState } from "react";
+import React from "react";
 import "./App.css";
 import { Message } from "./components/Message";
+import { Input } from "./components/Input";
+import { useMessageData } from "./MessageBoardContext";
+
+/** Renders the application
+ *
+ * @returns {React.FunctionComponent}
+ */
 export const App = () => {
-  const [messageList, setMessageList] = useState([
-    {
-      text: "This is a test message!",
-      member: {
-        color: "blue",
-        username: "bluemoon"
-      }
-    }
-  ]);
-  const [member, setMember] = useState({
-    username: "greenlake",
-    color: "green"
-  });
+  const { member } = useMessageData();
   return (
     <div className="App">
-      <Message messageList={messageList} currentMember={member} />
+      <Message currentMember={member} />
+      <Input />
     </div>
   );
 };

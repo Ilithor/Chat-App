@@ -1,15 +1,17 @@
 import React from "react";
+import { useMessageData } from "../MessageBoardContext";
 
 /** Renders a message with styles corresponding with who
  *  the message came from.
  *
- * @param {object[]} messageList
- * @param {any} currentMember
+ * @type {MessageComponentProps}
  * @returns {React.FunctionComponent}
  */
-export const Message = ({ messageList, currentMember }) => {
+export const Message = ({ currentMember }) => {
+  const { messageList } = useMessageData();
   const renderMessage = message => {
     const { member, text } = message;
+    console.log(member.id, currentMember.id);
     const messageFromMe = member.id === currentMember.id;
     const className = messageFromMe
       ? "Messages-message currentMember"
@@ -28,3 +30,11 @@ export const Message = ({ messageList, currentMember }) => {
     <ul className="Messages-list">{messageList.map(m => renderMessage(m))}</ul>
   );
 };
+
+/**
+ * @typedef MessageComponentProps
+ * @property {object} currentMember
+ * @property {number} currentMember.id
+ * @property {string} currentMember.color
+ * @property {string} currentMember.username
+ */
