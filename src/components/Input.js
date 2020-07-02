@@ -1,5 +1,10 @@
 import React from "react";
 import { useMessageData } from "../MessageBoardContext";
+
+/** Renders the message board text input
+ *
+ * @returns {React.FunctionComponent}
+ */
 export const Input = () => {
   const { onSendMessage, text, setText } = useMessageData();
 
