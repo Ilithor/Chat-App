@@ -11,7 +11,6 @@ export const Message = ({ currentMember }) => {
   const { messageList } = useMessageData();
   const renderMessage = message => {
     const { member, text } = message;
-    console.log(member.id, currentMember.id);
     const messageFromMe = member.id === currentMember.id;
     const className = messageFromMe
       ? "Messages-message currentMember"
