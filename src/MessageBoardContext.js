@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 /** @type {React.Context<MessageBoardContextProps>} */
 const messageBoardContext = createContext();
 
@@ -19,31 +19,233 @@ const messageBoardContext = createContext();
  * @returns {React.FunctionComponent}
  */
 export const MessageBoardProvider = ({ children }) => {
-  const [messageList, setMessageList] = useState([
-    {
-      text: "This is a test message!",
-      member: {
-        color: "blue",
-        username: "bluemoon",
-        id: 1
-      }
-    }
-  ]);
+  const [messageList, setMessageList] = useState([]);
+  const randomName = () => {
+    const adjectives = [
+      "autumn",
+      "hidden",
+      "bitter",
+      "misty",
+      "silent",
+      "empty",
+      "dry",
+      "dark",
+      "summer",
+      "icy",
+      "delicate",
+      "quiet",
+      "white",
+      "cool",
+      "spring",
+      "winter",
+      "patient",
+      "twilight",
+      "dawn",
+      "crimson",
+      "wispy",
+      "weathered",
+      "blue",
+      "billowing",
+      "broken",
+      "cold",
+      "damp",
+      "falling",
+      "frosty",
+      "green",
+      "long",
+      "late",
+      "lingering",
+      "bold",
+      "little",
+      "morning",
+      "muddy",
+      "old",
+      "red",
+      "rough",
+      "still",
+      "small",
+      "sparkling",
+      "throbbing",
+      "shy",
+      "wandering",
+      "withered",
+      "wild",
+      "black",
+      "young",
+      "holy",
+      "solitary",
+      "fragrant",
+      "aged",
+      "snowy",
+      "proud",
+      "floral",
+      "restless",
+      "divine",
+      "polished",
+      "ancient",
+      "purple",
+      "lively",
+      "nameless"
+    ];
+    const nouns = [
+      "waterfall",
+      "river",
+      "breeze",
+      "moon",
+      "rain",
+      "wind",
+      "sea",
+      "morning",
+      "snow",
+      "lake",
+      "sunset",
+      "pine",
+      "shadow",
+      "leaf",
+      "dawn",
+      "glitter",
+      "forest",
+      "hill",
+      "cloud",
+      "meadow",
+      "sun",
+      "glade",
+      "bird",
+      "brook",
+      "butterfly",
+      "bush",
+      "dew",
+      "dust",
+      "field",
+      "fire",
+      "flower",
+      "firefly",
+      "feather",
+      "grass",
+      "haze",
+      "mountain",
+      "night",
+      "pond",
+      "darkness",
+      "snowflake",
+      "silence",
+      "sound",
+      "sky",
+      "shape",
+      "surf",
+      "thunder",
+      "violet",
+      "water",
+      "wildflower",
+      "wave",
+      "water",
+      "resonance",
+      "sun",
+      "wood",
+      "dream",
+      "cherry",
+      "tree",
+      "fog",
+      "frost",
+      "voice",
+      "paper",
+      "frog",
+      "smoke",
+      "star"
+    ];
+    const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+    const noun = nouns[Math.floor(Math.random() * nouns.length)];
+    return adjective + noun;
+  };
+
+  const randomColor = () => {
+    return "#" + Math.floor(Math.random() * 0xffffff).toString(16);
+  };
+
   const [member, setMember] = useState({
-    username: "greenlake",
-    color: "green",
-    id: 2
+    username: randomName(),
+    color: randomColor()
   });
   const [text, setText] = useState("");
+  const [drone, setDrone] = useState();
+  const [room, setRoom] = useState();
+  const [isRoom, setIsRoom] = useState(false);
 
   /** Handles adding new message to list
    *
-   * @param {string} message
+   * @param {object} message
    * @returns {void}
    */
   const onSendMessage = message => {
-    setMessageList([...messageList, { text: message, member: member }]);
+    drone.publish({
+      room: "observable-gonk",
+      message
+    });
   };
+  useEffect(() => {
+    setDrone(
+      new window.Scaledrone("7A27xHoFszEaNml9", {
+        data: member
+      })
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (drone) {
+      drone.on("open", err => {
+        if (err) {
+          return console.error(err);
+        }
+        const data = { ...member };
+        data.id = drone.clientId;
+        setMember(data);
+      });
+      setRoom(
+        drone.subscribe("observable-gonk", {
+          historyCount: 5
+        })
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drone]);
+
+  useEffect(() => {
+    if (room) {
+      room.on("open", err => {
+        if (err) {
+          return console.error(err);
+        }
+      });
+      setIsRoom(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room]);
+
+  useEffect(() => {
+    if (room) {
+      room.on("message", message => {
+        const { data, member, id } = message;
+        setMessageList([...messageList, { member, text: data, id }]);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room, messageList]);
+
+  useEffect(() => {
+    if (isRoom) {
+      const history = [];
+      room.on("history_message", message => {
+        const { data, clientId, id } = message;
+        history.push({
+          member: { clientData: { color: "red" }, id: clientId },
+          text: data,
+          id
+        });
+        setMessageList([...history]);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRoom]);
 
   const value = {
     messageList,
@@ -94,7 +296,7 @@ export const useMessageData = () => {
 
 /**
  * @typedef MessageBoardData
- * @property {message[]} [messagelist]
+ * @property {message[]} [messageList]
  * @property {member} [member]
  * @property {()=>void} [onSendMessage]
  * @property {string} [text]

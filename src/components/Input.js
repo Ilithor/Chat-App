@@ -13,8 +13,8 @@ export const Input = () => {
   };
   const handleSubmit = e => {
     e.preventDefault();
-    setText("");
     onSendMessage(text);
+    setText("");
   };
   return (
     <div className="Input">
