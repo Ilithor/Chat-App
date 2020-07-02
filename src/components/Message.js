@@ -1,15 +1,17 @@
 import React from "react";
+import { useMessageData } from "../MessageBoardContext";
 
 /** Renders a message with styles corresponding with who
  *  the message came from.
  *
- * @param {object[]} messageList
  * @param {any} currentMember
  * @returns {React.FunctionComponent}
  */
-export const Message = ({ messageList, currentMember }) => {
+export const Message = ({ currentMember }) => {
+  const { messageList } = useMessageData();
   const renderMessage = message => {
     const { member, text } = message;
+    console.log(member.id, currentMember.id);
     const messageFromMe = member.id === currentMember.id;
     const className = messageFromMe
       ? "Messages-message currentMember"
