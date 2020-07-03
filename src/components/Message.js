@@ -10,19 +10,22 @@ import { useMessageData } from "../MessageBoardContext";
 export const Message = ({ currentMember }) => {
   const { messageList } = useMessageData();
   const renderMessage = message => {
-    const { member, text } = message;
-    const messageFromMe = member.id === currentMember.id;
+    const { member, text, timestamp } = message;
+    const messageFromMe = member?.id === currentMember?.id;
     const className = messageFromMe
       ? "Messages-message currentMember"
       : "Messages-message";
     return (
-      <li className={className} key={member.id}>
+      <li className={className} key={member?.id}>
         <span
           className="avatar"
-          style={{ backgroundColor: member.clientData.color }}
+          style={{ backgroundColor: member?.clientData?.color }}
         />
         <div className="Message-content">
-          <div className="username">{member.clientData.username}</div>
+          <div className="username">
+            <div>{member?.clientData?.username}</div>
+            <div>{timestamp}</div>
+          </div>
           <div className="text">{text?.hello || text}</div>
         </div>
       </li>
