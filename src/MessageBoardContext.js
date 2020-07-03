@@ -9,12 +9,16 @@ const messageBoardContext = createContext();
  * @property {()=>void} onUserCreation
  * @property {member} memberCreation
  * @property {React.Dispatch<React.SetStateAction<member>>} setMemberCreation
+ * @property {boolean} isMember
+ * @property {React.Dispatch<React.SetStateAction<boolean>>} setIsMember
  * @property {member} member
  * @property {React.Dispatch<React.SetStateAction<member>>} setMember
  * @property {string} text
  * @property {React.Dispatch<React.SetStateAction<string>>} setText
  * @property {any} drone
  * @property {React.Dispatch<React.SetStateAction<any>>} setDrone
+ * @property {boolean} isDrone
+ * @property {React.Dispatch<React.SetStateAction<boolean>>} setIsDrone
  * @property {any} room
  * @property {React.Dispatch<React.SetStateAction<any>>} setRoom
  * @property {boolean} isRoom
@@ -61,7 +65,7 @@ export const MessageBoardProvider = ({ children }) => {
 
   /** Handles adding new message the room
    *
-   * @param {string} message
+   * @param {newMessageData} messageData
    * @returns {void}
    */
   const onSendMessage = messageData => {
@@ -224,6 +228,14 @@ export const useMessageData = () => {
 /**
  * @typedef IMessageBoardComponentProps
  * @property {React.ReactChild} children
+ */
+
+/**
+ * @typedef newMessageData
+ * @property {object} member
+ * @property {string} member.username
+ * @property {string} member.color
+ * @property {string} text
  */
 
 /**
