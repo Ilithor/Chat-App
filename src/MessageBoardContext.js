@@ -6,10 +6,19 @@ const messageBoardContext = createContext();
  * @typedef MessageBoardContextProps
  * @property {message[]} messageList
  * @property {React.Dispatch<React.SetStateAction<message[]>>} setMessageList
+ * @property {()=>void} onUserCreation
+ * @property {member} memberCreation
+ * @property {React.Dispatch<React.SetStateAction<member>>} setMemberCreation
  * @property {member} member
  * @property {React.Dispatch<React.SetStateAction<member>>} setMember
  * @property {string} text
  * @property {React.Dispatch<React.SetStateAction<string>>} setText
+ * @property {any} drone
+ * @property {React.Dispatch<React.SetStateAction<any>>} setDrone
+ * @property {any} room
+ * @property {React.Dispatch<React.SetStateAction<any>>} setRoom
+ * @property {boolean} isRoom
+ * @property {React.Dispatch<React.SetStateAction<boolean>>} setIsRoom
  * @property {()=>void} onSendMessage
  */
 
@@ -19,177 +28,70 @@ const messageBoardContext = createContext();
  * @returns {React.FunctionComponent}
  */
 export const MessageBoardProvider = ({ children }) => {
+  // Handles the messageList state
   const [messageList, setMessageList] = useState([]);
-  const randomName = () => {
-    const adjectives = [
-      "autumn",
-      "hidden",
-      "bitter",
-      "misty",
-      "silent",
-      "empty",
-      "dry",
-      "dark",
-      "summer",
-      "icy",
-      "delicate",
-      "quiet",
-      "white",
-      "cool",
-      "spring",
-      "winter",
-      "patient",
-      "twilight",
-      "dawn",
-      "crimson",
-      "wispy",
-      "weathered",
-      "blue",
-      "billowing",
-      "broken",
-      "cold",
-      "damp",
-      "falling",
-      "frosty",
-      "green",
-      "long",
-      "late",
-      "lingering",
-      "bold",
-      "little",
-      "morning",
-      "muddy",
-      "old",
-      "red",
-      "rough",
-      "still",
-      "small",
-      "sparkling",
-      "throbbing",
-      "shy",
-      "wandering",
-      "withered",
-      "wild",
-      "black",
-      "young",
-      "holy",
-      "solitary",
-      "fragrant",
-      "aged",
-      "snowy",
-      "proud",
-      "floral",
-      "restless",
-      "divine",
-      "polished",
-      "ancient",
-      "purple",
-      "lively",
-      "nameless"
-    ];
-    const nouns = [
-      "waterfall",
-      "river",
-      "breeze",
-      "moon",
-      "rain",
-      "wind",
-      "sea",
-      "morning",
-      "snow",
-      "lake",
-      "sunset",
-      "pine",
-      "shadow",
-      "leaf",
-      "dawn",
-      "glitter",
-      "forest",
-      "hill",
-      "cloud",
-      "meadow",
-      "sun",
-      "glade",
-      "bird",
-      "brook",
-      "butterfly",
-      "bush",
-      "dew",
-      "dust",
-      "field",
-      "fire",
-      "flower",
-      "firefly",
-      "feather",
-      "grass",
-      "haze",
-      "mountain",
-      "night",
-      "pond",
-      "darkness",
-      "snowflake",
-      "silence",
-      "sound",
-      "sky",
-      "shape",
-      "surf",
-      "thunder",
-      "violet",
-      "water",
-      "wildflower",
-      "wave",
-      "water",
-      "resonance",
-      "sun",
-      "wood",
-      "dream",
-      "cherry",
-      "tree",
-      "fog",
-      "frost",
-      "voice",
-      "paper",
-      "frog",
-      "smoke",
-      "star"
-    ];
-    const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-    const noun = nouns[Math.floor(Math.random() * nouns.length)];
-    return adjective + noun;
-  };
-
-  const randomColor = () => {
-    return "#" + Math.floor(Math.random() * 0xffffff).toString(16);
-  };
-
-  const [member, setMember] = useState({
-    username: randomName(),
-    color: randomColor()
-  });
-  const [text, setText] = useState("");
-  const [drone, setDrone] = useState();
-  const [room, setRoom] = useState();
-  const [isRoom, setIsRoom] = useState(false);
-
-  /** Handles adding new message to list
+  /** Handles creating a new user
    *
-   * @param {object} message
+   * @param {newMemberData} inputData
    * @returns {void}
    */
-  const onSendMessage = message => {
+  const onUserCreation = inputData => {
+    setMember({
+      username: inputData?.username,
+      color: inputData?.color
+    });
+    setIsMember(true);
+  };
+  // Handles user creation state
+  const [memberCreation, setMemberCreation] = useState();
+  // Handles member exists state
+  const [isMember, setIsMember] = useState(false);
+  // Handles the current user info
+  const [member, setMember] = useState();
+  // Handles the current message to be sent
+  const [text, setText] = useState("");
+  // Handles the drone object
+  const [drone, setDrone] = useState();
+  // Handles drone exists state
+  const [isDrone, setisDrone] = useState(false);
+  // Handles the room object
+  const [room, setRoom] = useState();
+  // Handles the room exists state
+  const [isRoom, setIsRoom] = useState(false);
+
+  /** Handles adding new message the room
+   *
+   * @param {string} message
+   * @returns {void}
+   */
+  const onSendMessage = messageData => {
+    const { text, member } = messageData;
     drone.publish({
       room: "observable-gonk",
-      message
+      message: {
+        username: member?.username,
+        color: member?.color,
+        message: text,
+        timestamp: Date.now()
+      }
     });
   };
+  // Passes user into the drone
   useEffect(() => {
-    setDrone(
-      new window.Scaledrone("7A27xHoFszEaNml9", {
-        data: member
-      })
-    );
+    if (member) {
+      setDrone(
+        new window.Scaledrone("7A27xHoFszEaNml9", {
+          data: member
+        })
+      );
+      setisDrone(true);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isMember]);
+  /**
+   * Initializes drone connection and sets clientId to user,
+   * then subscribes to the room.
+   */
   useEffect(() => {
     if (drone) {
       drone.on("open", err => {
@@ -202,13 +104,13 @@ export const MessageBoardProvider = ({ children }) => {
       });
       setRoom(
         drone.subscribe("observable-gonk", {
-          historyCount: 5
+          historyCount: 10
         })
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [drone]);
-
+  }, [isDrone]);
+  // Initializes the connection to the room
   useEffect(() => {
     if (room) {
       room.on("open", err => {
@@ -220,26 +122,46 @@ export const MessageBoardProvider = ({ children }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room]);
-
+  // Receives new messages from the room, and adds it to the messageList
   useEffect(() => {
     if (room) {
       room.on("message", message => {
         const { data, member, id } = message;
-        setMessageList([...messageList, { member, text: data, id }]);
+        setMessageList([
+          ...messageList,
+          {
+            member,
+            text: data?.message,
+            timestamp: data?.timestamp,
+            id
+          }
+        ]);
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room, messageList]);
-
+  // Pulls message history from the room and adds it to the messageList
   useEffect(() => {
     if (isRoom) {
       const history = [];
       room.on("history_message", message => {
         const { data, clientId, id } = message;
+        const converted = new Intl.DateTimeFormat("en-US", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit"
+        }).format(data?.timestamp);
         history.push({
-          member: { clientData: { color: "red" }, id: clientId },
-          text: data,
-          id
+          member: {
+            clientData: { username: data?.username, color: data?.color },
+            id: clientId
+          },
+          text: data?.message,
+          id,
+          timestamp: converted
         });
         setMessageList([...history]);
       });
@@ -250,9 +172,13 @@ export const MessageBoardProvider = ({ children }) => {
   const value = {
     messageList,
     member,
+    setMember,
     onSendMessage,
     text,
-    setText
+    setText,
+    memberCreation,
+    setMemberCreation,
+    onUserCreation
   };
 
   return (
@@ -290,6 +216,12 @@ export const useMessageData = () => {
  */
 
 /**
+ * @typedef newMemberData
+ * @property {string} username
+ * @property {string} color
+ */
+
+/**
  * @typedef IMessageBoardComponentProps
  * @property {React.ReactChild} children
  */
@@ -298,7 +230,11 @@ export const useMessageData = () => {
  * @typedef MessageBoardData
  * @property {message[]} [messageList]
  * @property {member} [member]
+ * @property {React.Dispatch<React.SetStateAction<member>>} setMember
  * @property {()=>void} [onSendMessage]
  * @property {string} [text]
  * @property {React.Dispatch<React.SetStateAction<string>>} [setText]
+ * @property {member} [memberCreation]
+ * @property {React.Dispatch<React.SetStateAction<member>>} [setMemberCreation]
+ * @property {()=>void} [onUserCreation]
  */
