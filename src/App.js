@@ -3,6 +3,7 @@ import "./App.css";
 import { Message } from "./components/Message";
 import { Input } from "./components/Input";
 import { useMessageData } from "./MessageBoardContext";
+import { MemberList } from "./components/MemberList";
 
 /** Renders the application
  *
@@ -15,6 +16,7 @@ export const App = () => {
       <div className="App-header">
         <h1>Gonk Communications Relay</h1>
       </div>
+      <MemberList />
       <Message currentMember={member} />
       <Input />
     </div>
