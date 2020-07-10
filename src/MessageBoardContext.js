@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import _ from "lodash";
 /** @type {React.Context<MessageBoardContextProps>} */
 const messageBoardContext = createContext();
 
@@ -13,6 +14,8 @@ const messageBoardContext = createContext();
  * @property {React.Dispatch<React.SetStateAction<boolean>>} setIsMember
  * @property {member} member
  * @property {React.Dispatch<React.SetStateAction<member>>} setMember
+ * @property {member[]} memberList
+ * @property {React.Dispatch<React.SetStateAction<member[]>>} setMemberList
  * @property {string} text
  * @property {React.Dispatch<React.SetStateAction<string>>} setText
  * @property {any} drone
@@ -52,6 +55,8 @@ export const MessageBoardProvider = ({ children }) => {
   const [isMember, setIsMember] = useState(false);
   // Handles the current user info
   const [member, setMember] = useState();
+  // Handles the user list
+  const [memberList, setMemberList] = useState([]);
   // Handles the current message to be sent
   const [text, setText] = useState("");
   // Handles the drone object
@@ -129,6 +134,11 @@ export const MessageBoardProvider = ({ children }) => {
   // Receives new messages from the room, and adds it to the messageList
   useEffect(() => {
     if (room) {
+      room.on("members", m => {
+        const temp = [];
+        _.map(m, member => [temp.push(member?.clientData?.username)]);
+        setMemberList(temp);
+      });
       room.on("message", message => {
         const { data, member, id } = message;
         setMessageList([
@@ -144,6 +154,22 @@ export const MessageBoardProvider = ({ children }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room, messageList]);
+  if (room) {
+    room.on("member_join", m => {
+      const updatedMemberList = [...memberList];
+      updatedMemberList.push(m?.clientData?.username);
+      setMemberList(updatedMemberList);
+    });
+  }
+  if (room) {
+    room.on("member_leave", ({ id }) => {
+      const updatedMemberList = [...memberList];
+      const index = memberList.findIndex(member => member?.id === id);
+      updatedMemberList.splice(index, 1);
+      setMemberList(updatedMemberList);
+    });
+  }
+
   // Pulls message history from the room and adds it to the messageList
   useEffect(() => {
     if (isRoom) {
@@ -182,7 +208,8 @@ export const MessageBoardProvider = ({ children }) => {
     setText,
     memberCreation,
     setMemberCreation,
-    onUserCreation
+    onUserCreation,
+    memberList
   };
 
   return (
